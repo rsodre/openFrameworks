@@ -30,6 +30,9 @@
  * ***********************************************************************/
 
 #include "ofxiOSAppDelegate.h"
+
+#if TARGET_OS_IOS || (TARGET_OS_IPHONE && !TARGET_OS_TV)
+
 #include "ofxiOSViewController.h"
 #include "ofxiOSExternalDisplay.h"
 #include "ofxiOSExtras.h"
@@ -85,7 +88,7 @@
     
     [center addObserver:self
                selector:@selector(handleScreenModeDidChangeNotification:)
-                   name:UIScreenDidDisconnectNotification object:nil];
+                   name:UIScreenModeDidChangeNotification object:nil];
     
     
     bool bDoesHWOrientation = ofxiOSGetOFWindow()->doesHWOrientation();
@@ -360,3 +363,5 @@
 
 
 @end
+
+#endif
