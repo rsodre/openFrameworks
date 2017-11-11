@@ -90,7 +90,7 @@
 			// Set the new dimensions and format
 			if( bestFormat != nullptr && bestW != 0 && bestH != 0 ){
 				if( bestW != width || bestH != height ){
-					ofLogWarning("ofAvFoundationGrabber") << " requested width and height aren't supported. Setting capture size to closest match: " << bestW << " by " << bestH<< endl;
+					ofLogWarning("ofAvFoundationGrabber") << " requested width and height aren't supported. Setting capture size to closest match: " << bestW << " by " << bestH<< std::endl;
 				}
 				
 				[device setActiveFormat:bestFormat];
@@ -239,8 +239,8 @@
 	return currentFrame;
 }
 
--(vector <string>)listDevices{
-    vector <string> deviceNames;
+-(std::vector <std::string>)listDevices{
+    std::vector <std::string> deviceNames;
 	NSArray * devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
 	int i=0;
 	for (AVCaptureDevice * captureDevice in devices){
@@ -317,7 +317,9 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 					
 					}
 				}
-				
+			
+			// Unlock the image buffer
+			CVPixelBufferUnlockBaseAddress(imageBuffer, kCVPixelBufferLock_ReadOnly);	
 				
 			}
 		}
@@ -475,10 +477,10 @@ void ofAVFoundationGrabber::updatePixelsCB(){
 	bHavePixelsChanged = true;
 }
 
-vector <ofVideoDevice> ofAVFoundationGrabber::listDevices() const{
-	vector <string> devList = [grabber listDevices];
+std::vector <ofVideoDevice> ofAVFoundationGrabber::listDevices() const{
+	std::vector <std::string> devList = [grabber listDevices];
     
-    vector <ofVideoDevice> devices; 
+    std::vector <ofVideoDevice> devices; 
     for(int i = 0; i < devList.size(); i++){
         ofVideoDevice vd; 
         vd.deviceName = devList[i]; 

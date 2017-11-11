@@ -43,8 +43,8 @@ enum ofAppEGLWindowType {
 	OF_APP_WINDOW_X11
 };
 
-typedef map<EGLint,EGLint> ofEGLAttributeList;
-typedef map<EGLint,EGLint>::iterator ofEGLAttributeListIterator;
+typedef std::map<EGLint,EGLint> ofEGLAttributeList;
+typedef std::map<EGLint,EGLint>::iterator ofEGLAttributeListIterator;
 
 class ofAppEGLWindow : public ofAppBaseGLESWindow, public ofThread {
 public:
@@ -73,7 +73,7 @@ public:
 	void finishRender();
 
 	ofCoreEvents & events();
-	shared_ptr<ofBaseRenderer> & renderer();
+	std::shared_ptr<ofBaseRenderer> & renderer();
 
 	void setThreadTimeout(long timeOut){ threadTimeout = timeOut; }
 
@@ -95,7 +95,7 @@ public:
 	virtual int	getWidth();
 	virtual int	getHeight();
 
-	virtual void setWindowTitle(string title); // TODO const correct
+	virtual void setWindowTitle(std::string title); // TODO const correct
 
 	virtual ofWindowMode getWindowMode();
 
@@ -159,14 +159,14 @@ protected:
 	bool bEnableSetupScreen;  ///< \brief This indicates the need/intent to draw a setup screen.
 	bool bShowCursor;  ///< \brief Indicate the visibility of the (mouse) cursor.
 
-	string eglDisplayString;
+	std::string eglDisplayString;
 	int nFramesSinceWindowResized;  ///< \brief The number of frames passed/shown since the window got resized.
 	ofOrientation orientation;
 
 
 	void threadedFunction();
-	queue<ofMouseEventArgs> mouseEvents;
-	queue<ofKeyEventArgs>   keyEvents;
+	std::queue<ofMouseEventArgs> mouseEvents;
+	std::queue<ofKeyEventArgs>   keyEvents;
 	void checkEvents();
 	ofImage mouseCursor;
 
@@ -180,6 +180,13 @@ protected:
 	// void setMouseScaleX(float x);
 	// float getMouseScaleY() const;
 	// void setMouseScaleY(float y);
+
+	// For absolute input devices that send ABS_X and ABS_Y events, we want to store
+	// information about the min and max axis values.
+	int mouseAbsXMin;
+	int mouseAbsXMax;
+	int mouseAbsYMin;
+	int mouseAbsYMax;
 	
 	bool hasMouse() { return mouseDetected; }
 	bool hasKeyboard() { return keyboardDetected; }
@@ -283,6 +290,6 @@ private:
 	bool mouseDetected;
 	long threadTimeout;
 	ofCoreEvents coreEvents;
-	shared_ptr<ofBaseRenderer> currentRenderer;
+	std::shared_ptr<ofBaseRenderer> currentRenderer;
 	static ofAppEGLWindow * instance;
 };

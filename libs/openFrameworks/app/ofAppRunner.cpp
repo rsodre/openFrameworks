@@ -21,6 +21,8 @@
 
 #include "ofMainLoop.h"
 
+using namespace std;
+
 #if !defined( TARGET_OF_IOS ) & !defined(TARGET_ANDROID) & !defined(TARGET_EMSCRIPTEN) & !defined(TARGET_RASPBERRY_PI)
 	#include "ofAppGLFWWindow.h"
 	//special case so we preserve supplied settngs
@@ -392,6 +394,16 @@ int ofGetWindowWidth(){
 //--------------------------------------------------
 int ofGetWindowHeight(){
 	return (int)mainLoop()->getCurrentWindow()->getWindowSize().y;
+}
+
+//--------------------------------------------------
+std::string ofGetClipboardString(){
+	return mainLoop()->getCurrentWindow()->getClipboardString();
+}
+
+//--------------------------------------------------
+void ofSetClipboardString(const std::string & str){
+	mainLoop()->getCurrentWindow()->setClipboardString(str);
 }
 
 //--------------------------------------------------
