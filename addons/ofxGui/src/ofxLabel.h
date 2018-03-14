@@ -5,7 +5,7 @@
 
 class ofxLabel: public ofxBaseGui {
 public:
-	ofxLabel(){label.setSerializable(false);}
+	ofxLabel(){label.setSerializable(true);}
     ofxLabel(ofParameter<std::string> _label, float width = defaultWidth, float height = defaultHeight);
 
 	template<typename F>
