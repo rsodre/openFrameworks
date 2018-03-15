@@ -13,6 +13,7 @@
 #include "ofCamera.h"
 #include "ofTrueTypeFont.h"
 #include "ofNode.h"
+#include "ofVideoBaseTypes.h"
 
 using namespace std;
 
@@ -1201,27 +1202,6 @@ void ofGLProgrammableRenderer::setAttributes(bool vertices, bool color, bool tex
 	if(wasColorsEnabled!=color){
 		if(currentShader) currentShader->setUniform1f(USE_COLORS_UNIFORM,color);
 	}
-#if defined(TARGET_OPENGLES) && !defined(TARGET_EMSCRIPTEN)
-	if(vertices){
-		glEnableClientState(GL_VERTEX_ARRAY);
-	}
-	if(color){
-		glEnableClientState(GL_COLOR_ARRAY);
-	}else{
-		glDisableClientState(GL_COLOR_ARRAY);
-	}
-	if(tex){
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	}else{
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
-	if(normals){
-		glEnableClientState(GL_NORMAL_ARRAY);
-	}else{
-		glDisableClientState(GL_NORMAL_ARRAY);
-	}
-
-#endif
 }
 
 //----------------------------------------------------------
@@ -1864,14 +1844,14 @@ void ofGLProgrammableRenderer::drawString(const ofTrueTypeFont & font, string te
 #ifdef TARGET_OPENGLES
 static const string vertex_shader_header =
 		"%extensions%\n"
-		"precision mediump float;\n"
+		"precision highp float;\n"
 		"#define IN attribute\n"
 		"#define OUT varying\n"
 		"#define TEXTURE texture2D\n"
 		"#define TARGET_OPENGLES\n";
 static const string fragment_shader_header =
 		"%extensions%\n"
-		"precision mediump float;\n"
+		"precision highp float;\n"
 		"#define IN varying\n"
 		"#define OUT\n"
 		"#define TEXTURE texture2D\n"
@@ -2651,28 +2631,34 @@ void ofGLProgrammableRenderer::saveFullViewport(ofPixels & pixels){
 }
 
 void ofGLProgrammableRenderer::saveScreen(int x, int y, int w, int h, ofPixels & pixels){
-
     int sh = getViewportHeight();
 
 
-	#ifndef TARGET_OPENGLES
-	ofBufferObject buffer;
-	pixels.allocate(w, h, OF_PIXELS_RGB);
-	buffer.allocate(pixels.size(),GL_STATIC_READ);
+    #ifndef TARGET_OPENGLES
 	if(isVFlipped()){
 		y = sh - y;
 		y -= h; // top, bottom issues
 	}
+	auto pixelFormat = OF_PIXELS_BGRA;
+	pixels.allocate(w, h, pixelFormat);
+	auto glFormat = ofGetGlFormat(pixels);
+
+
+	ofBufferObject buffer;
+	buffer.allocate(pixels.size(), GL_STATIC_READ);
 
 	buffer.bind(GL_PIXEL_PACK_BUFFER);
-	glReadPixels(x, y, w, h, ofGetGlFormat(pixels), GL_UNSIGNED_BYTE, 0); // read the memory....
+	glReadPixels(x, y, w, h, glFormat, GL_UNSIGNED_BYTE, 0); // read the memory....
 	buffer.unbind(GL_PIXEL_PACK_BUFFER);
-	unsigned char * p = buffer.map<unsigned char>(GL_READ_ONLY);
-	ofPixels src;
-	src.setFromExternalPixels(p,w,h,OF_PIXELS_RGB);
-	src.mirrorTo(pixels,true,false);
-	buffer.unmap();
 
+	if(unsigned char * p = buffer.map<unsigned char>(GL_READ_ONLY)){
+		ofPixels src;
+		src.setFromExternalPixels(p,w,h,pixelFormat);
+		src.mirrorTo(pixels,true,false);
+		buffer.unmap();
+	}else{
+		ofLogError("ofGLProgrammableRenderer") << "Error saving screen";
+	}
 
 	#else
 
